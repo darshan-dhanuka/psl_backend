@@ -15,6 +15,7 @@ use Tymon\JWTAuth\PayloadFactory;
 use Tymon\JWTAuth\JWTManager as JWT;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {   
@@ -24,11 +25,12 @@ class UserController extends Controller
         //dd($request);
         //die;
         $validator = Validator::make($request->json()->all() , [
-            'name' => 'required|string|max:255',
+            'name' => 'max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6', 
-          
-            'phone' => 'required|max:10', 
+            'state' => 'max:6', 
+            'city' => 'max:6', 
+            'phone' => 'max:10', 
             'uname' => 'required|unique:users', 
         ]);
 
@@ -40,7 +42,10 @@ class UserController extends Controller
             'name' => $request->json()->get('name'),
             'email' => $request->json()->get('email'),
             'password' => Hash::make($request->json()->get('password')),
-            
+            'state' => $request->json()->get('state'),
+            'city' => $request->json()->get('city'),
+            'address' => $request->json()->get('address'),
+            'dob' =>date('Y-m-d', strtotime($request->json()->get('dob'))),
             'phone' => $request->json()->get('phone'),
             'uname' => $request->json()->get('uname'),
             'referral_code' => $request->json()->get('referral_code'),
@@ -62,8 +67,11 @@ class UserController extends Controller
         } catch (JWTException $e) {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
-
-        return response()->json( compact('token') );
+		$currentUser = Auth::user();
+		$name = $currentUser->name;
+		
+		//print_r(compact('token','resp'));exit;
+        return response()->json( compact('token','name') );
     }
 
     
@@ -186,5 +194,82 @@ class UserController extends Controller
 
          echo json_encode($resp);
      }
+
+
+	public function send_otp(Request $request)
+    {
+        error_reporting(E_ALL ^ E_NOTICE);
+        $resp = array();
+        $credentials = $request->json()->all();
+        $mobile_number = $credentials[0];
+        //dd($mobile_number);
+		//exit;
+        $apiKey = urlencode('hMkQfydUC6M-JRvPew5uwgT75vdyitJKmfztDmvSgN');
+            // $resp['errorcode'] = 0;
+             // Message details
+        $otp = rand(100000,999999);
+        //$numbers = array(919773486995);
+        $sender = urlencode('TXTLCL');
+        $message = rawurlencode('This is your otp - '.$otp.' .Please put this to verify');
+
+        $numbers = $mobile_number;
+
+        // Prepare data for POST request
+        $data = array('apikey' => $apiKey, 'numbers' => $numbers, "sender" => $sender, "message" => $message);
+
+        // Send the POST request with cURL
+       /* $ch = curl_init('https://api.textlocal.in/send/');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $content_mod = json_decode($response,true);
+
+        if(trim($content_mod['status']) == 'success'){*/
+            $ins_qry = DB::insert('insert into tbl_otp_verify  (number,otp) values (?, ?)', [$numbers, $otp]);
+            if($ins_qry){
+                $resp['errorcode'] = 0;
+                $resp['msg'] = 'Message sent successfully';
+            }else{
+                $resp['errorcode'] = 1;
+                $resp['msg'] = 'Message failed';
+            }
+       /* }else{
+            $resp['errorcode'] = 1;
+            $resp['msg'] = 'Message failed';
+        }*/
+        return json_encode($resp);
+
+         
+
+        
+    }
+
+
+public function psl_register(Request $request)
+    {
+        DB::enableQueryLog();
+		$resp = array();
+        $credentials = $request->json()->all();
+        $name = $credentials['name'];
+        $phone = $credentials['phone'];
+        $referral_code = $credentials['referral_code'];
+        $email = $credentials['email'];
+		$upd_qry = DB::update('UPDATE users SET phone = ?,name=?,referral_code=?  WHERE email = ?', [$phone,$name,$referral_code,$email]);
+		/* $query = DB::getQueryLog();
+		dd($upd_qry);
+		exit; */
+		if($upd_qry){
+                $resp['errorcode'] = 0;
+                $resp['msg'] = 'Registered successfully';
+            }else{
+                $resp['errorcode'] = 1;
+                $resp['msg'] = 'Registered failed';
+            }
+       
+        return json_encode($resp);
+    }
+    
 
 }

@@ -34,4 +34,6 @@ Route::middleware('cors')->group(function(){
     Route::post('forgetpw', 'UserController@forgetpw');
     Route::post('verify_otp', 'UserController@verify_otp');
     Route::post('reset_password', 'UserController@reset_password');
+    Route::post('send_otp', 'UserController@send_otp');
+    Route::post('psl_register', 'UserController@psl_register');
  });
