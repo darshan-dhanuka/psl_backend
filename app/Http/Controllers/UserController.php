@@ -26,7 +26,7 @@ class UserController extends Controller
         //die;
         $validator = Validator::make($request->json()->all() , [
             'name' => 'max:255',
-            'email' => 'required|string|email|max:255|unique:users,phone,null',
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6', 
             'state' => 'max:6', 
             'city' => 'max:6', 
@@ -38,7 +38,7 @@ class UserController extends Controller
                 return response()->json($validator->errors(), 422 );
         }
 
-        $user = User::updateOrCreate([
+        $user = User::create([
             'name' => $request->json()->get('name'),
             'email' => $request->json()->get('email'),
             'password' => Hash::make($request->json()->get('password')),
