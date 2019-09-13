@@ -108,7 +108,8 @@ class UserController extends Controller
         {
             // $resp['errorcode'] = 0;
              // Message details
-        $otp = rand(100000,999999);
+        //$otp = rand(100000,999999);
+        $otp = 111111;
         //$numbers = array(919773486995);
         $sender = urlencode('TXTLCL');
         $message = rawurlencode('This is your otp - '.$otp.' .Please put this to verify');
