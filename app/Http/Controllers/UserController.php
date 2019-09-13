@@ -38,7 +38,7 @@ class UserController extends Controller
                 return response()->json($validator->errors(), 422 );
         }
 
-        $user = User::create([
+        $user = User::updateOrCreate([
             'name' => $request->json()->get('name'),
             'email' => $request->json()->get('email'),
             'password' => Hash::make($request->json()->get('password')),
