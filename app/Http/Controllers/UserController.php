@@ -161,7 +161,7 @@ class UserController extends Controller
          $otp = $credentials['otp_text'];
 
          $sel_qry = DB::select('SELECT otp FROM  tbl_otp_verify WHERE  
-                        number = ? ORDER BY id DESC limit 1', [$mobile_number,$otp] );
+                        number = ? ORDER BY id DESC limit 1', [$mobile_number] );
          //dd($sel_qry);
          $otp_db = $sel_qry[0]->otp;
 
