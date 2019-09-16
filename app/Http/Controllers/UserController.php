@@ -60,20 +60,7 @@ class UserController extends Controller
     
     public function login(Request $request)
     {
-        $credentials = $request->json()->all();
-        //var_dump($credentials);
-        try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'invalid_credentials'], 400);
-            }
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'could_not_create_token'], 500);
-        }
-		$currentUser = Auth::user();
-		$name = $currentUser->name;
-		
-		//print_r(compact('token','resp'));exit;
-        return response()->json( compact('token','name') );
+        dd("in login");
     }
 
     
