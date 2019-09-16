@@ -94,11 +94,12 @@ class UserController extends Controller
 
     public function forgetpw(Request $request)
     {
-        error_reporting(E_ALL ^ E_NOTICE);
+        dd("hello");
+		error_reporting(E_ALL ^ E_NOTICE);
         $resp = array();
         $credentials = $request->json()->all();
         $mobile_number = $credentials['phone'];
-        //dd($mobile_number);
+        
         $apiKey = urlencode('hMkQfydUC6M-JRvPew5uwgT75vdyitJKmfztDmvSgN');
 
         $sel_qry = DB::select('SELECT * FROM users WHERE phone  = ? ', [$mobile_number]);
