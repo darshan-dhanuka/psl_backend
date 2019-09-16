@@ -277,6 +277,7 @@ class UserController extends Controller
     
 	public function email()
 	{
+		dd("hello");
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
 		$sender = 'darshan.dhanukaa@gmail.com';
