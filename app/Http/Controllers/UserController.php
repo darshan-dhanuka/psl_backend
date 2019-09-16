@@ -275,7 +275,7 @@ class UserController extends Controller
         return json_encode($resp);
     }
     
-	public function email()
+	public function email_funct()
 	{
 		dd("hello");
 		// Replace sender@example.com with your "From" address.

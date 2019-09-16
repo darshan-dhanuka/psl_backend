@@ -17,7 +17,7 @@ Route::get('tasks/{id}', 'TaskController@show');
 Route::post('tasks', 'TaskController@store');
 Route::put('tasks/{id}', 'TaskController@update');
 Route::delete('tasks/{id}', 'TaskController@delete');
-Route::post('email', 'UserController@email');	
+
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -36,5 +36,6 @@ Route::middleware('cors')->group(function(){
     Route::post('reset_password', 'UserController@reset_password');
     Route::post('send_otp', 'UserController@send_otp');
     Route::post('psl_register', 'UserController@psl_register');
+	Route::post('email_funct', 'UserController@email_funct');	
 											 
  });
