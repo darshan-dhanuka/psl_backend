@@ -58,7 +58,25 @@ class UserController extends Controller
         return response()->json(compact('user','token'),201);
     }
     
-   
+    public function login(Request $request)
+    {
+        $credentials = $request->json()->all();
+        //var_dump($credentials);
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 400);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_create_token'], 500);
+        }
+		$currentUser = Auth::user();
+		$name = $currentUser->name;
+		
+		//print_r(compact('token','resp'));exit;
+        return response()->json( compact('token','name') );
+    }
+
+    
 
     public function getAuthenticatedUser()
     {
@@ -257,10 +275,8 @@ class UserController extends Controller
         return json_encode($resp);
     }
     
-	public function login(Request $request)
+	public function email_funct(Request $request)
 	{
-		 $credentials = $request->json()->all();
-		dd("hello");
 		// Replace sender@example.com with your "From" address.
 		// This address must be verified with Amazon SES.
 		$sender = 'darshan.dhanukaa@gmail.com';
@@ -300,7 +316,7 @@ class UserController extends Controller
 			interface using the <a href="https://github.com/PHPMailer/PHPMailer">
 			PHPMailer</a> class.</p>';
 
-		$mail = new PHPMailer(true);
+		$mail = new \PHPMailer(true);
 
 		try {
 			// Specify the SMTP settings.
