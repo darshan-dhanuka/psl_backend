@@ -16,8 +16,6 @@ use Tymon\JWTAuth\JWTManager as JWT;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-//use PHPMailer\PHPMailer\PHPMailer;
-//use PHPMailer\PHPMailer\Exception;
 
 class UserController extends Controller
 {   
@@ -60,7 +58,20 @@ class UserController extends Controller
     
     public function login(Request $request)
     {
-        dd("in login");
+        $credentials = $request->json()->all();
+        //var_dump($credentials);
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'invalid_credentials'], 400);
+            }
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'could_not_create_token'], 500);
+        }
+		$currentUser = Auth::user();
+		$name = $currentUser->name;
+		
+		//print_r(compact('token','resp'));exit;
+        return response()->json( compact('token','name') );
     }
 
     
@@ -262,8 +273,5 @@ class UserController extends Controller
         return json_encode($resp);
     }
     
-	public function email_funct(Request $request)
-	{
-		dd("in");
-	}
+	
 }
