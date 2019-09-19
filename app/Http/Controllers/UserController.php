@@ -349,6 +349,24 @@ class UserController extends Controller
 
 		
 	}
-					
+    
+    public function update_password_once(Request $request)
+    {
+        $credentials = $request->json()->all();
+        $password = Hash::make('Psl@1234');
+        $mobile_num = $credentials['mobile_num'];
+
+        $sel_qry = DB::update('UPDATE users SET password = ?', [$password]);
+        //dd($sel_qry);
+        if($sel_qry){
+            $resp['errorcode'] = 0;
+            $resp['msg'] = 'Updated';
+        }else{
+            $resp['errorcode'] = 1;
+            $resp['msg'] = 'Failed';
+        }
+
+        echo json_encode($resp);
+    }
 
 }

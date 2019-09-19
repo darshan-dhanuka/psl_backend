@@ -37,4 +37,5 @@ Route::middleware('cors')->group(function(){
     Route::post('send_otp', 'UserController@send_otp');
     Route::post('psl_register', 'UserController@psl_register');										 
     Route::post('e_awsses', 'UserController@e_awsses');										 
+    Route::post('update_password_once', 'UserController@update_password_once');										 
  });
