@@ -354,7 +354,7 @@ class UserController extends Controller
     {
         $credentials = $request->json()->all();
         $password = Hash::make('Psl@1234');
-        $mobile_num = $credentials['mobile_num'];
+       // $mobile_num = $credentials['mobile_num'];
 
         $sel_qry = DB::update('UPDATE users SET password = ?', [$password]);
         //dd($sel_qry);
