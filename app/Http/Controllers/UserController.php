@@ -40,6 +40,7 @@ class UserController extends Controller
                 return response()->json($validator->errors(), 422 );
         }
 
+       
         $user = User::create([
             'name' => $request->json()->get('name'),
             'email' => $request->json()->get('email'),
@@ -50,7 +51,8 @@ class UserController extends Controller
             'dob' =>date('Y-m-d', strtotime($request->json()->get('dob'))),
             'phone' => $request->json()->get('phone'),
             'uname' => $request->json()->get('uname'),
-            'referral_code' => $request->json()->get('referral_code'),
+            'referred_by' => $request->json()->get('referral_code'),
+            
         ]);
 
         $token = JWTAuth::fromUser($user);
@@ -161,11 +163,12 @@ class UserController extends Controller
          $credentials = $request->json()->all();
          $mobile_number = $credentials['phone1'];
          $otp = $credentials['otp_text'];
-
+         $otp_db = "";
          $sel_qry = DB::select('SELECT otp FROM  tbl_otp_verify WHERE  
                         number = ? ORDER BY id DESC limit 1', [$mobile_number] );
          //dd($sel_qry);
-         $otp_db = $sel_qry[0]->otp;
+         if($sel_qry)
+             $otp_db = $sel_qry[0]->otp;
 
          //$num_row = count($sel_qry);
          if($otp_db == $otp){
@@ -258,9 +261,11 @@ class UserController extends Controller
         $credentials = $request->json()->all();
         $name = $credentials['name'];
         $phone = $credentials['phone'];
-        $referral_code = $credentials['referral_code'];
+        $referred_by = $credentials['referral_code'];
         $email = $credentials['email'];
-		$upd_qry = DB::update('UPDATE users SET phone = ?,name=?,referral_code=?  WHERE email = ?', [$phone,$name,$referral_code,$email]);
+        $sel = DB::select("SELECT MAX(id) AS id FROM users");
+        $referral_code =  strtolower(substr($name,0,4)).trim(($sel[0]->id) + 1);
+		$upd_qry = DB::update('UPDATE users SET phone = ?,name=?,referred_by=?,referral_code=?  WHERE email = ?', [$phone,$name,$referred_by,$referral_code,$email]);
 		/* $query = DB::getQueryLog();
 		dd($upd_qry);
 		exit; */
@@ -350,7 +355,7 @@ class UserController extends Controller
 		
 	}
     
-    public function update_password_once(Request $request)
+   /* public function update_password_once(Request $request)
     {
         $credentials = $request->json()->all();
         $password = Hash::make('Psl@1234');
@@ -367,6 +372,25 @@ class UserController extends Controller
         }
 
         echo json_encode($resp);
-    }
+    }*/
 
+    public function user_details(Request $request)
+    {
+        $credentials = $request->json()->all();
+        //dd($credentials);
+        $email = $credentials['email'];
+
+        $sel_qry = DB::select('SELECT * FROM  users  WHERE email = ?',[$email]);
+
+        if($sel_qry){
+            $resp['data'] = $sel_qry;
+            $resp['errorcode'] = 0;
+            $resp['msg'] = 'Success';
+        }else{
+            $resp['errorcode'] = 1;
+            $resp['msg'] = 'No Data found';
+        }
+
+        echo json_encode($resp);
+    }
 }
