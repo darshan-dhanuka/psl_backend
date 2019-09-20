@@ -263,8 +263,8 @@ class UserController extends Controller
         $phone = $credentials['phone'];
         $referred_by = $credentials['referral_code'];
         $email = $credentials['email'];
-        $sel = DB::select("SELECT MAX(id) AS id FROM users");
-        $referral_code =  strtolower(substr($name,0,4)).trim(($sel[0]->id) + 1);
+        $sel = DB::select("SELECT id FROM users where email=?",[$email]);
+        $referral_code =  strtolower(substr($name,0,4)).trim(($sel[0]->id));
 		$upd_qry = DB::update('UPDATE users SET phone = ?,name=?,referred_by=?,referral_code=?  WHERE email = ?', [$phone,$name,$referred_by,$referral_code,$email]);
 		/* $query = DB::getQueryLog();
 		dd($upd_qry);
