@@ -63,7 +63,24 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->json()->all();
-        //var_dump($credentials);
+		
+		//print_r($credentials);
+		
+		$loginField = $request->json()->all()['email'];
+		$credentials = null;
+
+		if ($loginField !== null) {
+			$loginType = filter_var($loginField, FILTER_VALIDATE_EMAIL) ? 'email' : 'uname';
+			//print_r($loginType);
+			request()->merge([ $loginType => $loginField ]);
+
+			$credentials = request([ $loginType, 'password' ]);
+		} 
+		else {
+			return $this->response->errorBadRequest('What do you think you\'re doing?');
+		}
+		//var_dump($credentials);
+
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 400);
@@ -393,4 +410,38 @@ class UserController extends Controller
 
         echo json_encode($resp);
     }
+
+    public function change_password_user(Request $request)
+     {
+        $credentials = $request->json()->all();
+        $old_password = $credentials['password'];
+        //echo "<br>".$credentials['password'];
+        //echo "<br>".$credentials['new_password'];
+        $password = Hash::make($credentials['new_password']);
+        $email = $credentials['email'];
+		
+		$user = User::where('email', '=', $email)->first();
+
+         //$chck_old_pw = DB::select('SELECT id FROM users WHERE password = ? AND email = ?', [$old_password,$email]);
+         //dd($chck_old_pw);
+         //if(count($chck_old_pw) > 0){
+         if(Hash::check($old_password, $user->password)){
+
+             $sel_qry = DB::update('UPDATE users SET password = ? WHERE email = ?', [$password,$email]);
+
+             if($sel_qry){
+                 $resp['errorcode'] = 0;
+                 $resp['msg'] = 'Password Updated';
+             }else{
+                 $resp['errorcode'] = 1;
+                 $resp['msg'] = 'Something went wrong. Please try again later';
+             }
+         }else{
+             $resp['errorcode'] = 2;
+             $resp['msg'] = 'Please put correct old password';
+         }
+
+         echo json_encode($resp);
+     }
+
 }

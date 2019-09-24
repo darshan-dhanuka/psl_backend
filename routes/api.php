@@ -39,4 +39,5 @@ Route::middleware('cors')->group(function(){
     Route::post('e_awsses', 'UserController@e_awsses');										 
     //Route::post('update_password_once', 'UserController@update_password_once');										 
     Route::post('user_details', 'UserController@user_details');										 
+    Route::post('change_password_user', 'UserController@change_password_user');										 
  });
