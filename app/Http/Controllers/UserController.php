@@ -393,12 +393,19 @@ class UserController extends Controller
 
     public function user_details(Request $request)
     {
-        $credentials = $request->json()->all();
+        //DB::enableQueryLog();
+		$credentials = $request->json()->all();
         //dd($credentials);
         $email = $credentials['email'];
 
-        $sel_qry = DB::select('SELECT * FROM  users  WHERE email = ?',[$email]);
+		if ($email !== null) 
+			$variable = filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'uname';
 
+        $sel_qry = DB::select('SELECT * FROM  users  WHERE '.$variable.' = ?',[$email]);
+		//$query = DB::getQueryLog();
+		//dd(DB::getQueryLog());
+		//dd($sel_qry);
+		
         if($sel_qry){
             $resp['data'] = $sel_qry;
             $resp['errorcode'] = 0;
