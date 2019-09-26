@@ -26,24 +26,30 @@ class UserController extends Controller
     {
         //dd($request);
         //die;
-        $validator = Validator::make($request->json()->all() , [
-            'name' => 'max:255',
+		$sel = DB::select("SELECT phone FROM users where email=? AND (phone != null OR phone != '')",[$request->json()->get('email')]);
+
+		if(count($sel) > 0)
+		{
+			$validator = Validator::make($request->json()->all() , [
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6', 
-            'state' => 'max:6', 
-            'city' => 'max:6', 
-            'phone' => 'max:10', 
             'uname' => 'required|unique:users', 
-        ]);
+			]);
+		}
+		else
+		{
+			$validator = Validator::make($request->json()->all() , [   
+            'password' => 'required|string|min:6', 
+			'uname' => 'required|unique:users', 
+			]);
+		}
 
-        if($validator->fails()){
+		if($validator->fails()){
                 return response()->json($validator->errors(), 422 );
-        }
-
-       
-        $user = User::create([
+			}
+        //$user = User::create([
+		$user = User::updateOrCreate(['email' => $request->json()->get('email')],[
             'name' => $request->json()->get('name'),
-            'email' => $request->json()->get('email'),
             'password' => Hash::make($request->json()->get('password')),
             'state' => $request->json()->get('state'),
             'city' => $request->json()->get('city'),
@@ -68,7 +74,7 @@ class UserController extends Controller
 		
 		$loginField = $request->json()->all()['email'];
 		$credentials = null;
-
+		$name = "";
 		if ($loginField !== null) {
 			$loginType = filter_var($loginField, FILTER_VALIDATE_EMAIL) ? 'email' : 'uname';
 			//print_r($loginType);
@@ -81,18 +87,29 @@ class UserController extends Controller
 		}
 		//var_dump($credentials);
 
-        try {
+		$sel = DB::select("SELECT phone FROM users where ".$loginType."=? AND (phone != null OR phone != '')",[$loginField]);
+
+		if(count($sel) > 0)
+		{
+			try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'invalid_credentials'], 400);
             }
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'could_not_create_token'], 500);
-        }
-		$currentUser = Auth::user();
-		$name = $currentUser->name;
+			} catch (JWTException $e) {
+				return response()->json(['error' => 'could_not_create_token'], 500);
+			}
+			$currentUser = Auth::user();
+			$name = $currentUser->name;
+			
+			
+		}
+		else
+		{
+			 return response()->json(['error' => 'invalid_credentials'], 400);
+		}
 		
-		//print_r(compact('token','resp'));exit;
-        return response()->json( compact('token','name') );
+        //print_r(compact('token','resp'));exit;
+		return response()->json( compact('token','name') );
     }
 
     
